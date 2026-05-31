@@ -289,9 +289,10 @@ Each line in the file will look like:
 The logger does not use raw `file_put_contents` or `mkdir`:
 
 - An instance of `MB\Filesystem\Filesystem` is used with `basePath` from `LoggerConfig`.
-- Logs are written via `updateContent($path, $updater, $atomic = false)`:
-  - `atomic = false` is faster and sufficient for logs.
-  - You can inject a custom `Filesystem` in `Logger::fromConfig()` or the `Logger` constructor.
+- Each log line is written by appending to the file:
+  - If the filesystem exposes `append()` (default `MB\Filesystem\Filesystem` does), the line is appended with `FILE_APPEND | LOCK_EX` — O(1) per write and safe under concurrent writers.
+  - Otherwise it falls back to a `updateContent()` read-modify-write cycle.
+  - You can inject any `MB\Filesystem\Contracts\Filesystem` implementation in `Logger::fromConfig()` or the `Logger` constructor.
 
 ---
 
