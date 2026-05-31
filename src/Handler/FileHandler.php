@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace MB\Logger\Handler;
 
 use MB\Logger\Contracts\ChannelHandlerInterface;
-use MB\Filesystem\Filesystem as MbFilesystem;
+use MB\Filesystem\Contracts\Filesystem as FilesystemContract;
 
 final class FileHandler implements ChannelHandlerInterface
 {
     public function __construct(
-        private readonly MbFilesystem $filesystem
+        private readonly FilesystemContract $filesystem
     ) {
     }
 

@@ -119,25 +119,25 @@ class Logger extends AbstractLogger
             throw new InvalidArgumentException(sprintf('Invalid log level "%s".', $level));
         }
 
-        $targetChannelName = $this->config->defaultChannel;
+        $this->channel($this->resolveChannelForLevel($level))->log($level, $message, $context);
+    }
 
+    /**
+     * Resolve which channel a level should be routed to.
+     *
+     * A channel that declares an explicit `levels` whitelist and accepts the
+     * level takes precedence (most specific wins); otherwise the message goes
+     * to the default channel.
+     */
+    private function resolveChannelForLevel(string $level): string
+    {
         foreach ($this->config->channels as $name => $ch) {
             if ($ch['levels'] !== null && $this->config->acceptsLevel($name, $level)) {
-                $targetChannelName = $name;
-                break;
+                return $name;
             }
         }
 
-        if ($targetChannelName === $this->config->defaultChannel) {
-            foreach ($this->config->channels as $name => $ch) {
-                if ($this->config->acceptsLevel($name, $level)) {
-                    $targetChannelName = $name;
-                    break;
-                }
-            }
-        }
-
-        $this->channel($targetChannelName)->log($level, $message, $context);
+        return $this->config->defaultChannel;
     }
 
     private static function detectDriverByPattern(string $filePattern): string

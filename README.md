@@ -107,8 +107,8 @@ Use config for flexible setup (separate error files, patterns, etc.).
 
 ### `driver`: `single` vs `daily`
 
-- **`single`** — one file per channel (no date-based rotation); writes to `filenamePattern`.
-- **`daily`** — date-based filenames; typically used with patterns like `{date}.log` or `error_{date}.log`.
+- **`single`** — one file per channel (no date-based rotation); writes to `filenamePattern` as-is.
+- **`daily`** — date-based rotation. If `filenamePattern` already contains `{date}` (e.g. `{date}.log`, `error_{date}.log`), it is used as-is. If it does **not** contain `{date}` (e.g. `app.log`), the date is injected automatically before the extension → `app-YYYY-MM-DD.log`. This guarantees a new file per day regardless of the pattern.
 - Both support `path`, `filenamePattern`, `dateFormat`, and `levels`.
 
 ### Example: error files by date `error_YYYY-MM-DD.log`
