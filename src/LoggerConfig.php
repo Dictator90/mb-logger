@@ -80,13 +80,33 @@ final class LoggerConfig
     public function resolveFilename(string $name, string $level, \DateTimeInterface $date): string
     {
         $ch = $this->getChannel($name);
+        $pattern = $ch['filenamePattern'];
+
+        // The daily driver guarantees date-based rotation: if the pattern has
+        // no explicit {date} placeholder, inject one before the extension so
+        // "daily" actually produces a new file per day.
+        if ($ch['driver'] === self::DRIVER_DAILY && !str_contains($pattern, '{date}')) {
+            $pattern = self::injectDatePlaceholder($pattern);
+        }
+
         $replacements = [
             '{level}' => $level,
             '{LEVEL}' => strtoupper($level),
             '{date}' => $date->format($ch['dateFormat']),
         ];
 
-        return strtr($ch['filenamePattern'], $replacements);
+        return strtr($pattern, $replacements);
+    }
+
+    private static function injectDatePlaceholder(string $pattern): string
+    {
+        $dot = strrpos($pattern, '.');
+
+        if ($dot === false) {
+            return $pattern . '-{date}';
+        }
+
+        return substr($pattern, 0, $dot) . '-{date}' . substr($pattern, $dot);
     }
 
     public function getChannelRelativePath(string $name, string $level, \DateTimeInterface $date): string

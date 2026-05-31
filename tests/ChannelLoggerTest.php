@@ -178,6 +178,36 @@ class ChannelLoggerTest extends TestCase
         $this->assertStringContainsString('Daily message', $contents);
     }
 
+    public function testDailyDriverInjectsDateWhenPatternHasNoPlaceholder(): void
+    {
+        $config = LoggerConfig::fromArray([
+            'basePath' => $this->basePath,
+            'defaultChannel' => 'daily',
+            'channels' => [
+                'daily' => [
+                    'driver' => 'daily',
+                    'path' => 'daily',
+                    'filenamePattern' => 'app.log',
+                    'dateFormat' => 'Y-m-d',
+                ],
+            ],
+        ]);
+
+        $logger = Logger::fromConfig($config);
+        $logger->info('Daily without placeholder');
+
+        $today = (new \DateTimeImmutable())->format('Y-m-d');
+        $dailyLog = $this->basePath . DIRECTORY_SEPARATOR . 'daily' . DIRECTORY_SEPARATOR . "app-{$today}.log";
+        $staticLog = $this->basePath . DIRECTORY_SEPARATOR . 'daily' . DIRECTORY_SEPARATOR . 'app.log';
+
+        $this->assertFileExists($dailyLog);
+        $this->assertFileDoesNotExist($staticLog);
+
+        $contents = file_get_contents($dailyLog);
+        $this->assertIsString($contents);
+        $this->assertStringContainsString('Daily without placeholder', $contents);
+    }
+
     private function removeDirectory(string $dir): void
     {
         if (!is_dir($dir)) {

@@ -3,4 +3,4 @@
 /vendor/
 /.idea/
 /.phpunit.result.cache
-/.git
+/.phpunit.cache/
